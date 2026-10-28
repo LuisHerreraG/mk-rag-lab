@@ -159,6 +159,24 @@ Tres reglas duras del módulo:
 - Por eso `/ask` trae **límite por IP** (`RAG_RATE_LIMIT`, 10/min por defecto), **techo de
   tokens por respuesta** (`RAG_MAX_TOKENS`) y **API key opcional** (`RAG_API_KEY`). Debajo
   de Tailscale no hace falta ninguna; expuesto a internet, las tres son obligatorias.
+### ¿Y el endpoint? ¿Y si lo publico?
+
+Publicar el **código** no cuesta dinero: el endpoint no es una credencial. Sin la
+`api-key` nadie puede facturar un token — es una dirección, no una llave. Aun así el
+repo no contiene ni el endpoint ni el nombre de los recursos: `.env.example` lleva
+placeholders y el resto se lee del entorno.
+
+Lo que sí cuesta dinero es un **demo público**, y por eso los tres límites de arriba.
+Antes de cualquier `--public`:
+
+```bash
+./scripts/scan_public.sh     # árbol + HISTORIAL: endpoints, rutas, IPs, claves, hostnames
+```
+
+Ese escáner existe porque **corregir un archivo no borra un commit viejo**: las
+menciones que se limpian hoy siguen en el historial hasta que se reescribe — que es
+justo lo que se hizo antes de tener un remoto.
+
 - **El repo no lleva secretos**: las credenciales viven en
   `~/.config/mk-rag-lab/env` (600) y `.env` está gitignoreado. Verificado
   también en el historial de git: nunca se commiteó una clave.
