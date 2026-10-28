@@ -117,7 +117,7 @@ esté en el corpus, que son las únicas que revelan si el sistema alucina.
 ## Generación con citas (`rag.py` + `api.py`)
 
 ```bash
-uv run python -m mk_rag_lab.rag --repl --semantic          # bucle de preguntas (lo más rápido para probar)
+./ask.sh                                        # bucle de preguntas (lo más rápido para probar)
 uv run python -m mk_rag_lab.rag "¿qué mide hit@5?" --semantic             # una sola, streaming
 uv run uvicorn mk_rag_lab.api:app --port 8080                             # API
 curl -N "http://127.0.0.1:8080/ask?q=¿qué+mide+hit@5?&semantic=true"      # eventos SSE
