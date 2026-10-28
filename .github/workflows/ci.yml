@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - name: install (con dependencias de desarrollo: ruff y pytest viven ahí)
+      - name: install (incluye el extra dev, donde viven ruff y pytest)
         run: uv sync --frozen --extra dev || uv sync --extra dev
       - name: lint
         run: uv run ruff check src eval scripts
