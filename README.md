@@ -117,10 +117,14 @@ esté en el corpus, que son las únicas que revelan si el sistema alucina.
 ## Generación con citas (`rag.py` + `api.py`)
 
 ```bash
-uv run python -m mk_rag_lab.rag "¿qué mide hit@5?" --semantic             # streaming en consola
+uv run python -m mk_rag_lab.rag --repl --semantic          # bucle de preguntas (lo más rápido para probar)
+uv run python -m mk_rag_lab.rag "¿qué mide hit@5?" --semantic             # una sola, streaming
 uv run uvicorn mk_rag_lab.api:app --port 8080                             # API
 curl -N "http://127.0.0.1:8080/ask?q=¿qué+mide+hit@5?&semantic=true"      # eventos SSE
 ```
+
+El REPL no tiene memoria de conversación a propósito: cada turno se recupera desde cero,
+así lo que se evalúa es la misma cosa que se mide en `eval/run.py`.
 
 El contrato de `/ask` es `text/event-stream` en tres pasos: **citas primero**, después un
 evento por token, y al final `done` con el modelo y la latencia. Las citas van antes que

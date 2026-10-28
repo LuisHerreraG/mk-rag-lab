@@ -135,13 +135,19 @@ def main(argv: list[str] | None = None) -> int:
     from .search import retrieve
 
     parser = argparse.ArgumentParser(description="Pregunta al corpus, con citas.")
-    parser.add_argument("question")
+    parser.add_argument("question", nargs="?")
     parser.add_argument("--mode", default="hybrid")
     parser.add_argument("--top", type=int, default=5)
     parser.add_argument("--semantic", action="store_true")
     parser.add_argument("--index", default=None)
     parser.add_argument("--no-stream", action="store_true")
+    parser.add_argument("--repl", action="store_true", help="preguntas en bucle, sin reiniciar")
     args = parser.parse_args(argv)
+
+    if args.repl:
+        return _repl(args)
+    if not args.question:
+        parser.error("falta la pregunta (o usá --repl)")
 
     hits = retrieve(
         args.question, mode=args.mode, top=args.top, semantic=args.semantic, index=args.index
@@ -163,6 +169,53 @@ def main(argv: list[str] | None = None) -> int:
     print("\n\nFuentes:")
     for citation in build_context(hits)[1]:
         print(" ", citation)
+    return 0
+
+
+def _ask_once(question: str, args) -> None:
+    from .search import retrieve
+
+    hits = retrieve(
+        question, mode=args.mode, top=args.top, semantic=args.semantic, index=args.index
+    )
+    if not hits:
+        print(REFUSAL)
+        return
+    for token in stream_answer(question, hits):
+        print(token, end="", flush=True)
+    print("\n")
+    for citation in build_context(hits)[1]:
+        print("  ", citation)
+
+
+def _repl(args) -> int:
+    """Bucle de preguntas. Cada turno es independiente: no hay memoria de conversación.
+
+    La falta de memoria es deliberada en v1 — un turno con contexto heredado hace que
+    la evaluación deje de ser comparable entre preguntas.
+    """
+    print(
+        f"mk-rag-lab · modo={args.mode} · top={args.top} · semantic={args.semantic}"
+        f"{' · índice=' + args.index if args.index else ''}\n"
+        "Escribí una pregunta y Enter. 'salir' para terminar. Ctrl-C también.\n"
+    )
+    try:
+        while True:
+            try:
+                question = input("› ").strip()
+            except EOFError:
+                break
+            if question.lower() in {"salir", "exit", "quit"}:
+                break
+            if not question:
+                continue
+            try:
+                _ask_once(question, args)
+            except KeyboardInterrupt:
+                print()
+    except KeyboardInterrupt:
+        pass
+    print("chau")
     return 0
 
 
