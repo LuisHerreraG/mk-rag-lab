@@ -1,5 +1,7 @@
 # mk-rag-lab
 
+[![ci](https://github.com/LuisHerreraG/mk-rag-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/LuisHerreraG/mk-rag-lab/actions/workflows/ci.yml)
+
 **RAG sobre un corpus de documentos con Azure OpenAI + Azure AI Search, y una evaluación que se puede volver a correr.**
 
 El artefacto no es el chat: es la tabla de métricas y el código que la produce.
