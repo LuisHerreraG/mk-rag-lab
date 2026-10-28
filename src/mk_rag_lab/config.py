@@ -1,7 +1,7 @@
 """Configuration — reads credentials from outside the repo.
 
-The env file defaults to ``/mk-rag-lab/env`` (mode 600) and is
-never committed. Override the path with MK_RAG_ENV_FILE.
+The env file defaults to ``$XDG_CONFIG_HOME/mk-rag-lab/env`` (``~/.config`` when the
+variable is unset) and is never committed. Override the path with MK_RAG_ENV_FILE.
 """
 
 from __future__ import annotations
@@ -10,7 +10,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_ENV_FILE = Path.home() / "config-dir" / "secrets" / "mk-rag-lab.env"
+DEFAULT_ENV_FILE = Path(
+    os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")
+) / "mk-rag-lab" / "env"
 
 
 def _load_env_file(path: Path) -> None:

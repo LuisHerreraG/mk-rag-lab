@@ -35,8 +35,7 @@ uv pip install --python .venv/bin/python -e .
 ```
 
 Las credenciales **no viven en el repo**: el código lee
-`/mk-rag-lab/env` (modo 600) o la ruta que indique
-`MK_RAG_ENV_FILE`. Ver `.env.example` para los nombres.
+`~/.config/mk-rag-lab/env` (modo 600) o la ruta que indique `MK_RAG_ENV_FILE`. Ver `.env.example` para los nombres.
 
 ## Chunking: dos estrategias, medidas
 
@@ -161,7 +160,7 @@ Tres reglas duras del módulo:
   tokens por respuesta** (`RAG_MAX_TOKENS`) y **API key opcional** (`RAG_API_KEY`). Debajo
   de Tailscale no hace falta ninguna; expuesto a internet, las tres son obligatorias.
 - **El repo no lleva secretos**: las credenciales viven en
-  `/mk-rag-lab/env` (600) y `.env` está gitignoreado. Verificado
+  `~/.config/mk-rag-lab/env` (600) y `.env` está gitignoreado. Verificado
   también en el historial de git: nunca se commiteó una clave.
 
 ## Corpus

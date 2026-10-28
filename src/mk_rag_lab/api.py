@@ -61,7 +61,7 @@ def _rate_limit(request: Request) -> None:
 def _require_key(request: Request) -> None:
     """API key opcional: si RAG_API_KEY está definida, se exige el header.
 
-    Local no hace falta; expuesto al red privada o a internet, sí. La clave no viaja al
+    En local no hace falta; expuesto a una red o a internet, sí. La clave no viaja al
     repo: se lee del entorno, igual que las credenciales de Azure.
     """
     expected = os.environ.get("RAG_API_KEY")
