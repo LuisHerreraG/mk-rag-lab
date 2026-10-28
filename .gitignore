@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+out/
+
+# El corpus privado nunca se commitea: se indexa localmente y no sale de la máquina.
+corpus/private/*
+!corpus/private/.gitkeep
+
+# Resultados de evaluación: se versionan (quítalo si preferís no hacerlo)
+# eval/results.md

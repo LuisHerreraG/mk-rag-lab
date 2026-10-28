@@ -1,0 +1,4 @@
+# {"q": "pregunta", "expect": ["cadena que debe aparecer en el top-5"]}
+{"q": "¿por qué el chunking con solapamiento ayuda a la recuperación?", "expect": ["solapamiento", "overlap"]}
+{"q": "¿qué diferencia hay entre búsqueda por palabra clave y búsqueda vectorial?", "expect": ["vectorial", "palabra clave"]}
+{"q": "¿qué mide hit@5 en una evaluación de recuperación?", "expect": ["hit@5", "top 5", "top-5"]}
