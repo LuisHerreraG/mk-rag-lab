@@ -15,7 +15,7 @@ from pathlib import Path
 
 from azure.core.exceptions import ResourceNotFoundError
 
-from .chunking import chunk_markdown
+from .chunking import chunk_markdown, chunk_markdown_naive
 from .clients import embed, index_client, search_client, settings
 from .schema import build_index
 
@@ -33,11 +33,26 @@ def collect_files(corpus: Path) -> list[Path]:
     )
 
 
-def build_documents(corpus: Path, files: list[Path], *, batch: int = 16) -> list[dict]:
+STRATEGIES = {
+    "structure": chunk_markdown,   # por defecto: corta donde la estructura lo permite
+    "naive": chunk_markdown_naive, # grupo de control, para la comparación del eval
+}
+
+
+def build_documents(
+    corpus: Path,
+    files: list[Path],
+    *,
+    batch: int = 16,
+    strategy: str = "structure",
+    target: int = 800,
+    overlap: int = 150,
+) -> list[dict]:
+    chunker = STRATEGIES[strategy]
     documents: list[dict] = []
     for path in files:
         text = path.read_text(encoding="utf-8", errors="replace")
-        chunks = chunk_markdown(text)
+        chunks = chunker(text, target_tokens=target, overlap_tokens=overlap)
         if not chunks:
             continue
         for i in range(0, len(chunks), batch):
@@ -75,7 +90,16 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Ingesta de un corpus al índice.")
     p.add_argument("--corpus", default="corpus/public")
     p.add_argument("--recreate", action="store_true")
+    p.add_argument("--strategy", default="structure", choices=sorted(STRATEGIES))
+    p.add_argument("--index", default=None, help="sobrescribe AZURE_SEARCH_INDEX")
+    p.add_argument("--target", type=int, default=800, help="techo de tokens por fragmento")
+    p.add_argument("--overlap", type=int, default=150, help="presupuesto de solapamiento")
     args = p.parse_args(argv)
+
+    if args.index:
+        import os
+
+        os.environ["AZURE_SEARCH_INDEX"] = args.index
 
     corpus = Path(args.corpus)
     if not corpus.is_dir():
@@ -88,7 +112,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     ensure_index(recreate=args.recreate)
-    documents = build_documents(corpus, files)
+    documents = build_documents(
+        corpus, files, strategy=args.strategy, target=args.target, overlap=args.overlap
+    )
     result = search_client().upload_documents(documents=documents)
     ok = sum(1 for r in result if r.succeeded)
     print(f"{len(files)} documentos → {len(documents)} chunks → {ok} subidos")

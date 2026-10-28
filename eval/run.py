@@ -42,11 +42,11 @@ def p95(values: list[float]) -> float:
     return statistics.quantiles(values, n=20)[18]
 
 
-def run_mode(questions: list[dict], mode: str, top: int, semantic: bool) -> dict:
+def run_mode(questions: list[dict], mode: str, top: int, semantic: bool, index: str | None = None) -> dict:
     hits, latencies = 0, []
     for item in questions:
         started = time.perf_counter()
-        results = retrieve(item["q"], mode=mode, top=top, semantic=semantic)
+        results = retrieve(item["q"], mode=mode, top=top, semantic=semantic, index=index)
         latencies.append((time.perf_counter() - started) * 1000)
         blob = " ".join(r.content.lower() for r in results)
         if any(needle.lower() in blob for needle in item["expect"]):
@@ -63,12 +63,13 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--top", type=int, default=5)
     p.add_argument("--semantic", action="store_true", help="usa el ranker semántico en híbrido")
+    p.add_argument("--index", default=None, help="índice a evaluar (por defecto AZURE_SEARCH_INDEX)")
     args = p.parse_args(argv)
 
     questions = load_questions()
     print(f"{len(questions)} preguntas · top-{args.top}\n")
 
-    rows = [run_mode(questions, m, args.top, args.semantic) for m in MODES]
+    rows = [run_mode(questions, m, args.top, args.semantic, args.index) for m in MODES]
     header = f"{'modo':22s} {'hit@5':>7s} {'p50(ms)':>9s} {'p95(ms)':>9s}"
     print(header)
     print("-" * len(header))

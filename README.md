@@ -18,8 +18,8 @@ consulta ───────────────────────�
 | bloque | estado |
 |---|---|
 | 0 · cuenta y recursos | ✅ provisionado (ver *Entorno*) |
-| 1 · ingesta | ✅ baseline funcionando — **pendiente: tu chunking** |
-| 2 · recuperación | ✅ tres modos — **pendiente: tu rerank y tus decisiones** |
+| 1 · ingesta | ✅ chunking por estructura + baseline medible |
+| 2 · recuperación | ✅ tres modos (+ ranker semántico) — **pendiente: tus decisiones con números** |
 | 3 · API con streaming | ⬜ `mk_rag_lab/api.py` |
 | 4 · MCP + UI + entrega | ⬜ |
 
@@ -38,20 +38,43 @@ Las credenciales **no viven en el repo**: el código lee
 `/mk-rag-lab/env` (modo 600) o la ruta que indique
 `MK_RAG_ENV_FILE`. Ver `.env.example` para los nombres.
 
+## Chunking: dos estrategias, medidas
+
+`chunking.py` expone la estrategia por estructura (por defecto) y conserva el
+baseline de ventanas fijas como **grupo de control**, para que la comparación sea
+reproducible y no una opinión:
+
+```bash
+# el mismo corpus, dos estrategias, dos índices
+uv run python -m mk_rag_lab.ingest --corpus corpus/public --recreate --strategy structure --target 150 --overlap 50
+uv run python -m mk_rag_lab.ingest --corpus corpus/public --recreate --strategy naive    --target 150 --overlap 50 --index mk-rag-lab-naive
+```
+
+Con techo de 150 tokens sobre el corpus público (5 documentos, ~900 palabras):
+
+| estrategia | chunks | cercas de código partidas | citas con sección exacta |
+|---|---|---|---|
+| estructura | 12 | 0 | sí (`… › Contrato de la respuesta`) |
+| naive | 14 | 1 de 14 | a veces (a veces solo el título del documento) |
+
+Las tres decisiones y su porqué están en el docstring de `chunking.py`. La prueba de
+que el baseline falla de verdad vive en `tests/test_chunking.py`: un bloque de código
+más grande que la ventana del baseline termina partido por la mitad.
+
 ## Métricas
 
-Última corrida (`eval/run.py`, 3 preguntas, 4 documentos):
+`eval/run.py` escribe `eval/results.md`. Última corrida (3 preguntas, 5 documentos):
 
 | modo | hit@5 | p50 (ms) | p95 (ms) |
 |---|---|---|---|
 | keyword | 100 % | 149 | 1042 |
 | vector | 100 % | 429 | 1495 |
 | hybrid | 100 % | 444 | 1329 |
-| hybrid + semántico | — | — | — |
 
-> Con 4 documentos el hit@5 no discrimina: cualquier modo acierta. La tabla sirve
-> cuando el corpus llega a ~30 documentos y las preguntas incluyen las que cruzan
-> dos fuentes y las que **no** tienen respuesta en el corpus.
+> Con 5 documentos y 3 preguntas el hit@5 **no discrimina**: cualquier modo acierta.
+> La tabla empieza a significar algo con ~30 documentos y preguntas que crucen dos
+> fuentes o que no tengan respuesta en el corpus. El número está acá para mostrar que
+> el arnés funciona, no para presumirlo.
 
 ## Entorno (lo que este recurso permite, medido)
 

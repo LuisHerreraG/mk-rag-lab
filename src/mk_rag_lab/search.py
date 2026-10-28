@@ -31,7 +31,12 @@ class Hit:
 
 
 def retrieve(
-    query: str, *, mode: str = "hybrid", top: int = 5, semantic: bool = False
+    query: str,
+    *,
+    mode: str = "hybrid",
+    top: int = 5,
+    semantic: bool = False,
+    index: str | None = None,
 ) -> list[Hit]:
     if mode not in MODES:
         raise ValueError(f"mode debe ser uno de {MODES}")
@@ -57,7 +62,7 @@ def retrieve(
         kwargs["query_type"] = "semantic"
         kwargs["semantic_configuration_name"] = "default-semantic"
 
-    results = search_client().search(**kwargs)
+    results = search_client(index).search(**kwargs)
     return [
         Hit(
             path=r.get("path", ""),
@@ -76,10 +81,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--mode", default="hybrid", choices=MODES)
     p.add_argument("--top", type=int, default=5)
     p.add_argument("--semantic", action="store_true")
+    p.add_argument("--index", default=None, help="índice a consultar")
     args = p.parse_args(argv)
 
     for i, hit in enumerate(
-        retrieve(args.query, mode=args.mode, top=args.top, semantic=args.semantic), 1
+        retrieve(
+            args.query,
+            mode=args.mode,
+            top=args.top,
+            semantic=args.semantic,
+            index=args.index,
+        ),
+        1,
     ):
         score = f"{hit.score:.4f}" if hit.score is not None else "-"
         rerank = f" rerank={hit.reranker_score:.2f}" if hit.reranker_score else ""
