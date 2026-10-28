@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - name: install
-        run: uv sync --frozen || uv sync
+      - name: install (con dependencias de desarrollo: ruff y pytest viven ahí)
+        run: uv sync --frozen --extra dev || uv sync --extra dev
       - name: lint
         run: uv run ruff check src eval scripts
       - name: import + schema
