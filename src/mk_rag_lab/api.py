@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from collections import defaultdict, deque
 from collections.abc import Iterator
 
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -33,6 +34,28 @@ app = FastAPI(
     description="RAG sobre un corpus de documentos: recuperación híbrida + respuesta con citas.",
     version="0.1.0",
 )
+
+
+# Límite por IP: una demo pública sin esto es una factura abierta. En memoria y por
+# proceso — suficiente para una demo; para producción, el límite va en el proxy.
+RATE_LIMIT_PER_MINUTE = int(os.environ.get("RAG_RATE_LIMIT", "10"))
+_hits: dict[str, deque[float]] = defaultdict(deque)
+
+
+def _rate_limit(request: Request) -> None:
+    if RATE_LIMIT_PER_MINUTE <= 0:
+        return
+    client = request.client.host if request.client else "unknown"
+    now = time.time()
+    window = _hits[client]
+    while window and now - window[0] > 60:
+        window.popleft()
+    if len(window) >= RATE_LIMIT_PER_MINUTE:
+        raise HTTPException(
+            status_code=429,
+            detail=f"límite de {RATE_LIMIT_PER_MINUTE} consultas por minuto",
+        )
+    window.append(now)
 
 
 def _require_key(request: Request) -> None:
@@ -68,9 +91,16 @@ def _events(question: str, mode: str, top: int, semantic: bool, index: str | Non
     ]
     yield f"event: citations\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
+    emitted = 0
     for token in stream_answer(question, hits):
+        emitted += 1
         # un evento por token; \n escapado para no romper el framing de SSE
         yield f"data: {json.dumps(token, ensure_ascii=False)}\n\n"
+
+    if not emitted:
+        # el techo de tokens se gastó razonando: se dice, no se devuelve vacío
+        note = "El presupuesto de tokens se consumió razonando. Subí RAG_MAX_TOKENS."
+        yield f"event: error\ndata: {json.dumps({'detail': note})}\n\n"
 
     elapsed = int((time.perf_counter() - started) * 1000)
     done = {"model": settings().chat_deployment, "ms": elapsed}
@@ -87,6 +117,7 @@ def ask(
     index: str | None = Query(None, description="índice alternativo"),
 ) -> StreamingResponse:
     _require_key(request)
+    _rate_limit(request)
     if mode not in MODES:
         raise HTTPException(status_code=400, detail=f"mode debe ser uno de {MODES}")
     return StreamingResponse(

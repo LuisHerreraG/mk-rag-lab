@@ -112,13 +112,24 @@ def answer(question: str, hits: list[Hit]) -> Answer:
     return Answer(text=text, citations=citations, model=settings().chat_deployment)
 
 
+MAX_ANSWER_TOKENS = int(__import__("os").environ.get("RAG_MAX_TOKENS", "1200"))
+
+
 def stream_answer(question: str, hits: list[Hit]) -> Iterator[str]:
-    """Tokens a medida que llegan. El llamador decide qué hacer con ellos."""
+    """Tokens a medida que llegan. El llamador decide qué hacer con ellos.
+
+    `max_completion_tokens` es el cinturón de seguridad del costo, pero **en un modelo
+    de razonamiento ese techo incluye los tokens de razonamiento, que no se ven**. Con
+    400 el modelo a veces se queda sin presupuesto y devuelve **texto vacío**, de forma
+    intermitente. De ahí el default de 1200: margen para pensar y para responder. La
+    alternativa sería un modelo sin razonamiento (gpt-4o-mini) cuando el costo manda.
+    """
     from .clients import openai_client
 
     stream = openai_client().chat.completions.create(
         model=settings().chat_deployment,
         messages=build_messages(question, hits),
+        max_completion_tokens=MAX_ANSWER_TOKENS,
         stream=True,
     )
     for event in stream:
@@ -181,8 +192,12 @@ def _ask_once(question: str, args) -> None:
     if not hits:
         print(REFUSAL)
         return
+    emitted = 0
     for token in stream_answer(question, hits):
+        emitted += 1
         print(token, end="", flush=True)
+    if not emitted:
+        print("(sin texto: el presupuesto de tokens se consumió razonando — subí RAG_MAX_TOKENS)")
     print("\n")
     for citation in build_context(hits)[1]:
         print("  ", citation)

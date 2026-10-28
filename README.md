@@ -139,9 +139,30 @@ Tres reglas duras del módulo:
 3. **`/health` y `/ask`** comparten proceso; con `RAG_API_KEY` definida, `/ask` exige
    el header `x-api-key` (401 sin él, verificado).
 
-**Dato que afecta al eval:** `gpt-5-mini` **solo acepta la temperatura por defecto (1)**;
-`temperature=0` devuelve 400. La recuperación es reproducible, la generación no. Para
-comparar calidad de respuesta haría falta `seed` o promediar corridas.
+**Dos datos de `gpt-5-mini` que afectan al eval y al costo:**
+
+- **No acepta `temperature=0`** (400: sólo la default, 1). La recuperación es
+  reproducible; la generación no. Comparar calidad de respuesta exigiría `seed` o
+  promediar corridas.
+- **`max_completion_tokens` incluye los tokens de razonamiento**, que no se ven. Con un
+  techo de 400 el modelo devuelve **texto vacío de forma intermitente**. El default es
+  1200, y si la respuesta sale vacía la API emite `event: error` en vez de un stream
+  vacío silencioso.
+
+## Costo y exposición
+
+- **Comparar vectores no se factura por consulta.** La búsqueda se cobra por capacidad
+  (Search units/mes); en el tier Free es **$0**. La similitud coseno es cómputo interno
+  del servicio.
+- **El ranker semántico sí tiene tope**: **1.000 consultas gratis al mes**, después
+  ~$1 por 1.000. Es el límite que hay que mirar si el demo se hace público.
+- **El costo real son los tokens** de embeddings y de chat, no la búsqueda.
+- Por eso `/ask` trae **límite por IP** (`RAG_RATE_LIMIT`, 10/min por defecto), **techo de
+  tokens por respuesta** (`RAG_MAX_TOKENS`) y **API key opcional** (`RAG_API_KEY`). Debajo
+  de Tailscale no hace falta ninguna; expuesto a internet, las tres son obligatorias.
+- **El repo no lleva secretos**: las credenciales viven en
+  `/mk-rag-lab/env` (600) y `.env` está gitignoreado. Verificado
+  también en el historial de git: nunca se commiteó una clave.
 
 ## Corpus
 
