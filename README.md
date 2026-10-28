@@ -20,7 +20,7 @@ consulta ───────────────────────�
 | 0 · cuenta y recursos | ✅ provisionado (ver *Entorno*) |
 | 1 · ingesta | ✅ chunking por estructura + baseline medible |
 | 2 · recuperación | ✅ tres modos (+ ranker semántico) — **pendiente: tus decisiones con números** |
-| 3 · API con streaming | ⬜ `mk_rag_lab/api.py` |
+| 3 · generación + API | ✅ respuesta con citas, SSE, negativa explícita |
 | 4 · MCP + UI + entrega | ⬜ |
 
 ## Quickstart
@@ -113,6 +113,31 @@ esté en el corpus, que son las únicas que revelan si el sistema alucina.
 2. **La evaluación vive en el repo.** `eval/questions.jsonl` es el contrato: cada
    pregunta declara qué cadenas debe recuperar el top-5. Sin eso, "funciona" es una
    opinión.
+
+## Generación con citas (`rag.py` + `api.py`)
+
+```bash
+uv run python -m mk_rag_lab.rag "¿qué mide hit@5?" --semantic             # streaming en consola
+uv run uvicorn mk_rag_lab.api:app --port 8080                             # API
+curl -N "http://127.0.0.1:8080/ask?q=¿qué+mide+hit@5?&semantic=true"      # eventos SSE
+```
+
+El contrato de `/ask` es `text/event-stream` en tres pasos: **citas primero**, después un
+evento por token, y al final `done` con el modelo y la latencia. Las citas van antes que
+la primera palabra a propósito: nadie lee una afirmación sin poder ver la fuente.
+
+Tres reglas duras del módulo:
+
+1. **Responde con el contexto o dice que no.** Una pregunta fuera del corpus devuelve
+   `"No está en las fuentes que tengo indexadas."`, sin citas pegadas.
+2. **La cita la resuelve el código, no el modelo.** El `[3]` del texto siempre apunta
+   al fragmento 3 de la lista que se envió.
+3. **`/health` y `/ask`** comparten proceso; con `RAG_API_KEY` definida, `/ask` exige
+   el header `x-api-key` (401 sin él, verificado).
+
+**Dato que afecta al eval:** `gpt-5-mini` **solo acepta la temperatura por defecto (1)**;
+`temperature=0` devuelve 400. La recuperación es reproducible, la generación no. Para
+comparar calidad de respuesta haría falta `seed` o promediar corridas.
 
 ## Corpus
 
