@@ -37,8 +37,8 @@ done
 
 echo "== historial completo"
 for pat in "${PATTERNS[@]}"; do
-  hits=$(git log --all -p 2>/dev/null | grep -v '^+++' | grep -E "^\+" \
-    | grep -E "$pat" | grep -v -e 'scan_public.sh' -e 'uv.lock' -e 'pythonhosted' | head -2 || true)
+  hits=$(git log --all -p -- . ':!scripts/scan_public.sh' ':!uv.lock' 2>/dev/null \
+    | grep -v '^+++' | grep -E "^\+" | grep -E "$pat" | grep -v 'pythonhosted' | head -2 || true)
   if [ -n "$hits" ]; then
     echo "  ✗ historial /$pat/"
     echo "$hits" | sed 's/^/      /' | cut -c1-140
