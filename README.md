@@ -63,18 +63,32 @@ más grande que la ventana del baseline termina partido por la mitad.
 
 ## Métricas
 
-`eval/run.py` escribe `eval/results.md`. Última corrida (3 preguntas, 5 documentos):
+`eval/run.py` escribe `eval/results.md` con **hit@1, hit@5 y MRR**. La posición del
+acierto importa: acertar en el puesto 1 y acertar en el 5 no son el mismo sistema, y
+un hit@5 agregado esconde esa diferencia. El MRR premia que el acierto esté arriba.
 
-| modo | hit@5 | p50 (ms) | p95 (ms) |
-|---|---|---|---|
-| keyword | 100 % | 149 | 1042 |
-| vector | 100 % | 429 | 1495 |
-| hybrid | 100 % | 444 | 1329 |
+Última corrida (3 preguntas, 12 chunks):
 
-> Con 5 documentos y 3 preguntas el hit@5 **no discrimina**: cualquier modo acierta.
-> La tabla empieza a significar algo con ~30 documentos y preguntas que crucen dos
-> fuentes o que no tengan respuesta en el corpus. El número está acá para mostrar que
-> el arnés funciona, no para presumirlo.
+| modo | hit@1 | hit@5 | MRR | p50 (ms) | p95 (ms) |
+|---|---|---|---|---|---|
+| keyword | 67 % | 100 % | 0.833 | 146 | 1672 |
+| vector | 100 % | 100 % | 1.000 | 398 | 2118 |
+| hybrid | 67 % | 100 % | 0.833 | 439 | 624 |
+
+### El nivel de azar, antes de creerle a un número
+
+`eval/chance.py` mide qué tan bueno es el eval mismo:
+
+```bash
+uv run python eval/chance.py
+# corpus: 12 chunks · top-5 → azar analítico 5/12 = 42 %
+# azar empírico (consultas ajenas al corpus): 12/30 = 40 %
+```
+
+Con 12 chunks y top-5, **cuatro de cada diez aciertos ocurren por suerte**: un 100 %
+de hit@5 sobre 3 preguntas es perfectamente compatible con el azar. El eval necesita
+~30 documentos y preguntas que crucen dos fuentes — y algunas cuya respuesta **no**
+esté en el corpus, que son las únicas que revelan si el sistema alucina.
 
 ## Entorno (lo que este recurso permite, medido)
 
