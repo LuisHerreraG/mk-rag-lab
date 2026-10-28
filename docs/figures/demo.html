@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{--bg:#0b0f17;--panel:#11161f;--ink:#e6edf3;--dim:#8b949e;--green:#7ee787;--blue:#79c0ff;--purple:#d2a8ff;--border:#1f2630}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}
+.win{width:1200px;background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#0d1219;border-bottom:1px solid var(--border)}
+.dot{width:12px;height:12px;border-radius:50%}
+.t{color:var(--dim);font-size:13px;margin-left:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{margin:0;padding:22px 24px;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.q{color:var(--green)} .src{color:var(--dim)} .ref{color:var(--blue);font-weight:700} .no{color:var(--purple)}
+</style></head><body>
+<div class="win"><div class="bar">
+<span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span>
+<span class="dot" style="background:#28c840"></span><span class="t">mk-rag-lab  ·  ./ask.sh</span>
+</div><pre>mk-rag-lab · modo=hybrid · top=5 · semantic=True
+Escribí una pregunta y Enter. &#x27;salir&#x27; para terminar. Ctrl-C también.
+
+<span class="q">› Se usa solapamiento para repetir parte del final de un fragmento al comienzo del siguiente y así evitar que una idea que cae en el corte quede partida, garantizando que al menos uno de los fragmentos la contenga completa [1]. Un solapamiento típico es del 10–20% del tamaño del fragmento; el costo es mayor almacenamiento y redundancia en los resultados [1].</span>
+
+<span class="src">   [1] rag-chunking.md › Fragmentación (chunking) en RAG › Solapamiento</span>
+<span class="src">   [2] rag-chunking.md › Fragmentación (chunking) en RAG › Por qué se fragmenta</span>
+<span class="src">   [3] rag-chunking.md › Fragmentación (chunking) en RAG › Corte por estructura</span>
+<span class="src">   [4] rag-hybrid.md › Búsqueda híbrida › Reranking</span>
+<span class="src">   [5] rag-hybrid.md › Búsqueda híbrida › Dos señales distintas</span>
+<span class="no">› No está en las fuentes que tengo indexadas.</span></pre></div></body></html>

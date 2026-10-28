@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{--bg:#0b0f17;--panel:#11161f;--ink:#e6edf3;--dim:#8b949e;--border:#1f2630;--green:#7ee787;--blue:#79c0ff;--purple:#d2a8ff;--amber:#f0b429}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:var(--ink)}
+.card{width:1200px;padding:30px 34px 26px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+h1{font-size:25px;margin:0 0 4px} .sub{color:var(--dim);font-size:14.5px;margin-bottom:26px}
+.flow{display:flex;align-items:stretch;gap:10px}
+.step{flex:1;border:1px solid var(--border);border-radius:11px;padding:14px 14px 12px;background:#0e131b}
+.step .k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.step .n{font-size:15px;font-weight:700;margin-bottom:6px;line-height:1.25}
+.step .d{font-size:12.5px;color:var(--dim);line-height:1.4}
+.arrow{display:flex;align-items:center;color:#2f3a48;font-size:20px;padding-bottom:18px}
+.hl{border-color:#1f6f3d} .hl .n{color:var(--green)}
+.blue .n{color:var(--blue)} .purple .n{color:var(--purple)} .amber .n{color:var(--amber)}
+.band{display:flex;gap:10px;margin-top:16px}
+.note{flex:1;border:1px dashed #2a3340;border-radius:10px;padding:12px 14px;font-size:13px;color:var(--dim);line-height:1.45}
+.note b{color:var(--ink)}
+</style></head><body><div class="card">
+<h1>mk-rag-lab · arquitectura</h1>
+<div class="sub">RAG sobre documentación · Azure OpenAI + Azure AI Search · evaluación incluida</div>
+<div class="flow">
+  <div class="step"><div class="k">corpus</div><div class="n">Markdown</div><div class="d">público y privado por separado</div></div>
+  <div class="arrow">→</div>
+  <div class="step hl"><div class="k">1 · ingesta</div><div class="n">Chunking por estructura</div><div class="d">corta por encabezados, nunca parte código ni tablas</div></div>
+  <div class="arrow">→</div>
+  <div class="step blue"><div class="k">2 · índice</div><div class="n">Azure AI Search</div><div class="d">vectores 1536d + BM25, tier Free</div></div>
+  <div class="arrow">→</div>
+  <div class="step purple"><div class="k">3 · recuperación</div><div class="n">keyword · vector · hybrid</div><div class="d">fusión RRF + reranker semántico</div></div>
+  <div class="arrow">→</div>
+  <div class="step amber"><div class="k">4 · generación</div><div class="n">gpt-5-mini</div><div class="d">responde sólo con el contexto y cita [n]</div></div>
+  <div class="arrow">→</div>
+  <div class="step hl"><div class="k">salida</div><div class="n">Respuesta con citas</div><div class="d">SSE token a token · o se niega</div></div>
+</div>
+<div class="band">
+  <div class="note"><b>El modelo no busca.</b> Busca el código, antes de que el modelo exista en el request: es un <b>workflow</b>, no un agente.</div>
+  <div class="note"><b>La cita la resuelve el código.</b> Un <b>[3]</b> del texto siempre apunta al fragmento 3 enviado; el modelo no puede inventar rutas.</div>
+  <div class="note"><b>Medido, no afirmado.</b> hit@1, hit@5 y MRR, más el <b>nivel de azar</b> del propio eval: 40 % con 12 chunks.</div>
+</div>
+</div></body></html>

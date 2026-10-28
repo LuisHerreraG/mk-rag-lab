@@ -1,0 +1,11 @@
+mk-rag-lab · modo=hybrid · top=5 · semantic=True
+Escribí una pregunta y Enter. 'salir' para terminar. Ctrl-C también.
+
+› Se usa solapamiento para repetir parte del final de un fragmento al comienzo del siguiente y así evitar que una idea que cae en el corte quede partida, garantizando que al menos uno de los fragmentos la contenga completa [1]. Un solapamiento típico es del 10–20% del tamaño del fragmento; el costo es mayor almacenamiento y redundancia en los resultados [1].
+
+   [1] rag-chunking.md › Fragmentación (chunking) en RAG › Solapamiento
+   [2] rag-chunking.md › Fragmentación (chunking) en RAG › Por qué se fragmenta
+   [3] rag-chunking.md › Fragmentación (chunking) en RAG › Corte por estructura
+   [4] rag-hybrid.md › Búsqueda híbrida › Reranking
+   [5] rag-hybrid.md › Búsqueda híbrida › Dos señales distintas
+› No está en las fuentes que tengo indexadas.

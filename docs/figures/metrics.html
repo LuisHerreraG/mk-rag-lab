@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{--bg:#0b0f17;--panel:#11161f;--ink:#e6edf3;--dim:#8b949e;--border:#1f2630;--green:#7ee787;--amber:#f0b429}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:var(--ink)}
+.card{width:1200px;padding:34px 38px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+h1{font-size:26px;margin:0 0 6px} .sub{color:var(--dim);font-size:15px;margin-bottom:22px}
+table{width:100%;border-collapse:collapse;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px}
+th{text-align:left;color:var(--dim);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em}
+td{padding:12px;border-bottom:1px solid var(--border)}
+.best{color:var(--green);font-weight:700}
+.note{margin-top:22px;display:flex;gap:16px}
+.pill{flex:1;padding:16px 18px;border:1px solid var(--border);border-radius:10px}
+.pill b{display:block;font-size:30px;margin-bottom:4px}
+.warn{color:var(--amber)} .good{color:var(--green)}
+.pill span{color:var(--dim);font-size:13px;line-height:1.4;display:block}
+</style></head><body><div class="card">
+<h1>mk-rag-lab · evaluación de recuperación</h1>
+<div class="sub">misma consulta, tres estrategias · 3 preguntas · 12 chunks · top-5 · gpt-5-mini + text-embedding-3-small</div>
+<table><thead><tr><th>modo</th><th>hit@1</th><th>hit@5</th><th>MRR</th><th>p50 (ms)</th><th>p95 (ms)</th></tr></thead><tbody><tr><td>keyword</td><td>67 %</td><td>100 %</td><td>0.833</td><td>146</td><td>1672</td></tr><tr><td>vector</td><td>100 %</td><td>100 %</td><td class="best">1.000</td><td>398</td><td>2118</td></tr><tr><td>hybrid</td><td>67 %</td><td>100 %</td><td>0.833</td><td>439</td><td>624</td></tr></tbody></table>
+<div class="note">
+  <div class="pill"><b class="warn">40 %</b><span>acierto del azar con 12 chunks y top-5: por eso hit@5 solo no prueba nada</span></div>
+  <div class="pill"><b class="good">1.000</b><span>MRR del modo vectorial: acierta siempre en el primer puesto</span></div>
+  <div class="pill"><b>67 %</b><span>hit@1 del híbrido: el reranker sin ajustar desordena</span></div>
+</div></div></body></html>

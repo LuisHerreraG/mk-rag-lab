@@ -4,6 +4,8 @@
 
 El artefacto no es el chat: es la tabla de métricas y el código que la produce.
 
+![arquitectura](docs/figures/architecture.png)
+
 ```
 corpus/ ──ingest──► chunks + embeddings ──► Azure AI Search (índice vectorial + BM25)
                                                      │
